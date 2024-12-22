@@ -1,85 +1,139 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Layout } from "@/components/Layout";
 import { CourseCard } from "@/components/CourseCard";
-import { CategoryFilter } from "@/components/CategoryFilter";
+import { CourseFilters } from "@/components/filters/CourseFilters";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
 
-// Mock data
-const categories = ["Programming", "Design", "Business", "Marketing", "Personal Development"];
-
-const courses = [
+// Mock data for initial development
+const mockCategories = [
   {
-    id: 1,
-    title: "Complete Web Development Bootcamp",
-    description: "Learn web development from scratch with HTML, CSS, JavaScript, React, and Node.js",
-    category: "Programming",
-    duration: "12 weeks",
-    lessons: 120,
-    rating: 4.8,
-    imageUrl: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6",
-    price: 99.99,
+    id: "1",
+    name: "Programming",
+    children: [
+      {
+        id: "2",
+        name: "Web Development",
+        children: [
+          { id: "3", name: "Frontend" },
+          { id: "4", name: "Backend" },
+        ],
+      },
+      { id: "5", name: "Mobile Development" },
+    ],
   },
   {
-    id: 2,
-    title: "UI/UX Design Fundamentals",
-    description: "Master the principles of user interface and user experience design",
-    category: "Design",
-    duration: "8 weeks",
-    lessons: 84,
-    rating: 4.7,
-    imageUrl: "https://images.unsplash.com/photo-1545235617-9465d2a55698",
-    price: 89.99,
-  },
-  {
-    id: 3,
-    title: "Digital Marketing Mastery",
-    description: "Learn modern digital marketing strategies and tools",
-    category: "Marketing",
-    duration: "6 weeks",
-    lessons: 60,
-    rating: 4.6,
-    imageUrl: "https://images.unsplash.com/photo-1432888498266-38ffec3eaf0a",
-    price: 79.99,
+    id: "6",
+    name: "Design",
+    children: [
+      { id: "7", name: "UI/UX" },
+      { id: "8", name: "Graphic Design" },
+    ],
   },
 ];
 
+const mockInstructors = [
+  { id: "1", name: "John Doe" },
+  { id: "2", name: "Jane Smith" },
+];
+
+const mockTags = [
+  { id: "1", name: "Beginner" },
+  { id: "2", name: "Advanced" },
+  { id: "3", name: "JavaScript" },
+  { id: "4", name: "React" },
+];
+
 const Index = () => {
-  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [filters, setFilters] = useState({
+    categories: [],
+    instructors: [],
+    tags: [],
+    priceRange: { min: 0, max: 1000 },
+  });
 
-  const filteredCourses = selectedCategory === "all" 
-    ? courses 
-    : courses.filter(course => course.category === selectedCategory);
+  const { data: courses = [], isLoading } = useQuery({
+    queryKey: ["courses", filters],
+    queryFn: async () => {
+      let query = supabase
+        .from("courses")
+        .select("*")
+        .eq("status", "published");
 
-  const handleEnroll = (courseId: number) => {
+      if (filters.categories.length > 0) {
+        query = query.contains("category_ids", filters.categories);
+      }
+
+      if (filters.tags.length > 0) {
+        query = query.contains("tags", filters.tags);
+      }
+
+      if (filters.instructors.length > 0) {
+        query = query.in("instructor_id", filters.instructors);
+      }
+
+      query = query
+        .gte("regular_price", filters.priceRange.min)
+        .lte("regular_price", filters.priceRange.max);
+
+      const { data, error } = await query;
+
+      if (error) {
+        console.error("Error fetching courses:", error);
+        return [];
+      }
+
+      return data;
+    },
+  });
+
+  const handleEnroll = (courseId: string) => {
     console.log("Enrolling in course:", courseId);
     // Add enrollment logic here
   };
 
   return (
     <Layout>
-      <div className="space-y-8">
-        <div className="text-center space-y-4">
-          <h1 className="text-4xl font-bold tracking-tight">
-            Expand Your Knowledge
-          </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Choose from our wide range of courses and start learning today
-          </p>
-        </div>
+      <div className="flex gap-6">
+        <aside className="w-80 flex-shrink-0">
+          <CourseFilters
+            categories={mockCategories}
+            instructors={mockInstructors}
+            tags={mockTags}
+            onFiltersChange={setFilters}
+          />
+        </aside>
+        
+        <div className="flex-1">
+          <div className="text-center space-y-4 mb-8">
+            <h1 className="text-4xl font-bold tracking-tight">
+              Expand Your Knowledge
+            </h1>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Choose from our wide range of courses and start learning today
+            </p>
+          </div>
 
-        <CategoryFilter
-          categories={categories}
-          selectedCategory={selectedCategory}
-          onSelectCategory={setSelectedCategory}
-        />
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredCourses.map((course) => (
-            <CourseCard
-              key={course.id}
-              {...course}
-              onEnroll={() => handleEnroll(course.id)}
-            />
-          ))}
+          {isLoading ? (
+            <div>Loading courses...</div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {courses.map((course) => (
+                <CourseCard
+                  key={course.course_id}
+                  title={course.title}
+                  description={course.description || ""}
+                  category={course.category_ids?.[0] || "Uncategorized"}
+                  duration="12 weeks" // This should come from the course data
+                  lessons={10} // This should come from the course data
+                  rating={4.5} // This should come from the course data
+                  imageUrl={course.feature_image || "https://images.unsplash.com/photo-1461749280684-dccba630e2f6"}
+                  price={course.regular_price || 0}
+                  onEnroll={() => handleEnroll(course.course_id)}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </Layout>
