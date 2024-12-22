@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
 
 interface CourseCardProps {
+  courseId: string;
   title: string;
   description: string;
   category: string;
@@ -19,6 +20,7 @@ interface CourseCardProps {
 }
 
 export const CourseCard = ({
+  courseId,
   title,
   description,
   category,
