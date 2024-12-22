@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Clock, BookOpen, Star } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { Link } from "react-router-dom";
 
 interface CourseCardProps {
   title: string;
@@ -77,9 +78,16 @@ export const CourseCard = ({
           </div>
         </div>
       </CardContent>
-      <CardFooter className="flex justify-between items-center">
-        <span className="text-lg font-bold">${price}</span>
-        <Button onClick={onEnroll}>Enroll Now</Button>
+      <CardFooter className="flex justify-between items-center gap-4">
+        <div className="flex flex-col">
+          <span className="text-lg font-bold">${price}</span>
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outline" asChild>
+            <Link to={`/course/${courseId}`}>View Details</Link>
+          </Button>
+          <Button onClick={onEnroll}>Enroll Now</Button>
+        </div>
       </CardFooter>
     </Card>
   );
