@@ -121,12 +121,13 @@ const Index = () => {
               {courses.map((course) => (
                 <CourseCard
                   key={course.course_id}
+                  courseId={course.course_id}
                   title={course.title}
                   description={course.description || ""}
                   category={course.category_ids?.[0] || "Uncategorized"}
-                  duration="12 weeks" // This should come from the course data
-                  lessons={10} // This should come from the course data
-                  rating={4.5} // This should come from the course data
+                  duration="12 weeks"
+                  lessons={10}
+                  rating={4.5}
                   imageUrl={course.feature_image || "https://images.unsplash.com/photo-1461749280684-dccba630e2f6"}
                   price={course.regular_price || 0}
                   onEnroll={() => handleEnroll(course.course_id)}

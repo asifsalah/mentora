@@ -55,6 +55,7 @@ export const CourseInstructor = ({ instructor, courseId }: CourseInstructorProps
               {otherCourses.map((course: any) => (
                 <CourseCard
                   key={course.course_id}
+                  courseId={course.course_id}
                   title={course.title}
                   description={course.short_description || ""}
                   category={course.category_ids?.[0] || ""}
