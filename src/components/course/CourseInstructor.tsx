@@ -3,6 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { CourseCard } from "@/components/CourseCard";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 interface CourseInstructorProps {
   instructor: any;
@@ -10,7 +12,26 @@ interface CourseInstructorProps {
 }
 
 export const CourseInstructor = ({ instructor, courseId }: CourseInstructorProps) => {
-  const { data: otherCourses = [] } = useQuery({
+  // Return early if no instructor data
+  if (!instructor) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>About the Instructor</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              Instructor information not available
+            </AlertDescription>
+          </Alert>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const { data: otherCourses = [], isError } = useQuery({
     queryKey: ["instructor-courses", instructor.id, courseId],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -22,8 +43,9 @@ export const CourseInstructor = ({ instructor, courseId }: CourseInstructorProps
         .limit(3);
 
       if (error) throw error;
-      return data;
+      return data || [];
     },
+    enabled: !!instructor?.id && !!courseId,
   });
 
   return (
@@ -48,7 +70,7 @@ export const CourseInstructor = ({ instructor, courseId }: CourseInstructorProps
           </div>
         </div>
 
-        {otherCourses.length > 0 && (
+        {otherCourses.length > 0 && !isError && (
           <div className="space-y-4">
             <h4 className="font-semibold">Other Courses by {instructor.first_name}</h4>
             <div className="space-y-4">
