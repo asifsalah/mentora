@@ -19,7 +19,7 @@ const CourseDetails = () => {
         .from("courses")
         .select(`
           *,
-          instructor:profiles!courses_instructor_id_fkey(
+          instructor:profiles(
             id,
             first_name,
             last_name,
@@ -28,7 +28,7 @@ const CourseDetails = () => {
           )
         `)
         .eq("course_id", courseId)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       return data;
