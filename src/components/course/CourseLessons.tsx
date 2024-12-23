@@ -36,6 +36,15 @@ export const CourseLessons = ({ courseId }: CourseLessonsProps) => {
   const { data: lessonDetails = {} } = useQuery({
     queryKey: ["lesson-details", courseId],
     queryFn: async () => {
+      // First get all lesson IDs for this course
+      const { data: lessonIds } = await supabase
+        .from("lessons")
+        .select("lesson_id")
+        .eq("course_id", courseId);
+
+      if (!lessonIds?.length) return {};
+
+      // Then fetch materials and quizzes for these lessons
       const { data, error } = await supabase
         .from("lessons")
         .select(`
