@@ -80,16 +80,16 @@ export const CourseCard = ({
           </div>
         </div>
       </CardContent>
-      <CardFooter className="flex-none mt-auto">
-        <div className="w-full flex items-center justify-between gap-4">
-          <div className="flex flex-col">
-            <span className="text-lg font-bold">${price}</span>
-          </div>
+      <CardFooter className="flex-none mt-auto border-t pt-4">
+        <div className="w-full flex items-center justify-between">
+          <span className="text-2xl font-bold">${price}</span>
           <div className="flex gap-2">
-            <Button variant="outline" asChild>
+            <Button variant="outline" asChild className="px-6">
               <Link to={`/course/${courseId}`}>View Details</Link>
             </Button>
-            <Button onClick={onEnroll}>Enroll Now</Button>
+            <Button onClick={onEnroll} className="px-6 bg-[#1a1d24] hover:bg-[#2a2d34]">
+              Enroll Now
+            </Button>
           </div>
         </div>
       </CardFooter>
