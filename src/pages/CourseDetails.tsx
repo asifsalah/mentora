@@ -19,7 +19,7 @@ const CourseDetails = () => {
         .from("courses")
         .select(`
           *,
-          instructor:instructor_id (
+          instructor:profiles!courses_instructor_id_fkey(
             id,
             first_name,
             last_name,
