@@ -51,8 +51,8 @@ export const CourseCard = ({
   });
 
   return (
-    <Card className="overflow-hidden transition-all duration-300 hover:shadow-lg">
-      <div className="relative h-48 overflow-hidden">
+    <Card className="flex flex-col h-full overflow-hidden transition-all duration-300 hover:shadow-lg">
+      <div className="relative aspect-video">
         <img
           src={imageUrl}
           alt={title}
@@ -60,12 +60,12 @@ export const CourseCard = ({
         />
         <Badge className="absolute top-2 right-2 bg-primary/90">{categoryName}</Badge>
       </div>
-      <CardHeader>
-        <h3 className="text-xl font-semibold line-clamp-1">{title}</h3>
-        <p className="text-muted-foreground line-clamp-2 text-sm">{description}</p>
+      <CardHeader className="flex-none">
+        <h3 className="text-xl font-semibold">{title}</h3>
+        <p className="text-muted-foreground text-sm line-clamp-2">{description}</p>
       </CardHeader>
-      <CardContent>
-        <div className="flex justify-between items-center text-sm text-muted-foreground">
+      <CardContent className="flex-1">
+        <div className="grid grid-cols-3 gap-4 text-sm text-muted-foreground">
           <div className="flex items-center gap-1">
             <Clock className="w-4 h-4" />
             <span>{duration}</span>
@@ -80,15 +80,17 @@ export const CourseCard = ({
           </div>
         </div>
       </CardContent>
-      <CardFooter className="flex justify-between items-center gap-4">
-        <div className="flex flex-col">
-          <span className="text-lg font-bold">${price}</span>
-        </div>
-        <div className="flex gap-2">
-          <Button variant="outline" asChild>
-            <Link to={`/course/${courseId}`}>View Details</Link>
-          </Button>
-          <Button onClick={onEnroll}>Enroll Now</Button>
+      <CardFooter className="flex-none mt-auto">
+        <div className="w-full flex items-center justify-between gap-4">
+          <div className="flex flex-col">
+            <span className="text-lg font-bold">${price}</span>
+          </div>
+          <div className="flex gap-2">
+            <Button variant="outline" asChild>
+              <Link to={`/course/${courseId}`}>View Details</Link>
+            </Button>
+            <Button onClick={onEnroll}>Enroll Now</Button>
+          </div>
         </div>
       </CardFooter>
     </Card>

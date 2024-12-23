@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Layout } from "@/components/Layout";
 import { CourseCard } from "@/components/CourseCard";
 import { CourseFilters } from "@/components/filters/CourseFilters";
@@ -89,19 +89,20 @@ const Index = () => {
 
   const handleEnroll = (courseId: string) => {
     console.log("Enrolling in course:", courseId);
-    // Add enrollment logic here
   };
 
   return (
     <Layout>
-      <div className="flex gap-6">
-        <aside className="w-80 flex-shrink-0">
-          <CourseFilters
-            categories={mockCategories}
-            instructors={mockInstructors}
-            tags={mockTags}
-            onFiltersChange={setFilters}
-          />
+      <div className="flex flex-col lg:flex-row gap-8">
+        <aside className="w-full lg:w-80 shrink-0">
+          <div className="sticky top-24 bg-background p-4 rounded-lg border">
+            <CourseFilters
+              categories={mockCategories}
+              instructors={mockInstructors}
+              tags={mockTags}
+              onFiltersChange={setFilters}
+            />
+          </div>
         </aside>
         
         <div className="flex-1">
@@ -115,9 +116,15 @@ const Index = () => {
           </div>
 
           {isLoading ? (
-            <div>Loading courses...</div>
+            <div className="flex justify-center items-center min-h-[200px]">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            </div>
+          ) : courses.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-lg text-muted-foreground">No courses found matching your criteria.</p>
+            </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {courses.map((course) => (
                 <CourseCard
                   key={course.course_id}
