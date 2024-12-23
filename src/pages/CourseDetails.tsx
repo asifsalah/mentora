@@ -8,14 +8,16 @@ import { CourseInstructor } from "@/components/course/CourseInstructor";
 import { RelatedCourses } from "@/components/course/RelatedCourses";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 const CourseDetails = () => {
   const { courseId } = useParams();
 
-  const { data: course, isLoading } = useQuery({
+  const { data: course, isLoading, error } = useQuery({
     queryKey: ["course", courseId],
     queryFn: async () => {
-      // First, get the course and instructor ID
+      // First, get the course data
       const { data: courseData, error: courseError } = await supabase
         .from("courses")
         .select("*")
@@ -59,6 +61,19 @@ const CourseDetails = () => {
             </div>
           </div>
         </div>
+      </Layout>
+    );
+  }
+
+  if (error) {
+    return (
+      <Layout>
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            Error loading course: {error.message}
+          </AlertDescription>
+        </Alert>
       </Layout>
     );
   }
