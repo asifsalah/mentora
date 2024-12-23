@@ -61,7 +61,7 @@ export const CourseCard = ({
         <Badge className="absolute top-2 right-2 bg-primary/90">{categoryName}</Badge>
       </div>
       <CardHeader className="flex-none">
-        <h3 className="text-xl font-semibold">{title}</h3>
+        <h3 className="text-xl font-semibold line-clamp-1">{title}</h3>
         <p className="text-muted-foreground text-sm line-clamp-2">{description}</p>
       </CardHeader>
       <CardContent className="flex-1">
@@ -80,16 +80,16 @@ export const CourseCard = ({
           </div>
         </div>
       </CardContent>
-      <CardFooter className="flex-none mt-auto border-t pt-4">
-        <div className="w-full flex items-center justify-between">
+      <CardFooter className="flex-none border-t pt-4">
+        <div className="w-full grid grid-cols-[auto_1fr] gap-4 items-center">
           <span className="text-2xl font-bold">${price}</span>
-          <div className="flex gap-2 flex-shrink-0">
-            <Button variant="outline" asChild className="px-6">
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" asChild>
               <Link to={`/course/${courseId}`}>View Details</Link>
             </Button>
             <Button 
               onClick={onEnroll} 
-              className="px-6 bg-[#1a1d24] hover:bg-[#2a2d34] whitespace-nowrap"
+              className="bg-[#1a1d24] hover:bg-[#2a2d34]"
             >
               Enroll Now
             </Button>
