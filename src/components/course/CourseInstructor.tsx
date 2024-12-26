@@ -12,8 +12,63 @@ interface CourseInstructorProps {
 }
 
 export const CourseInstructor = ({ instructor, courseId }: CourseInstructorProps) => {
+  // Fetch instructor profile data
+  const { data: instructorProfile, isLoading } = useQuery({
+    queryKey: ["instructor-profile", instructor?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", instructor?.id)
+        .maybeSingle();
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!instructor?.id,
+  });
+
+  const { data: otherCourses = [], isError } = useQuery({
+    queryKey: ["instructor-courses", instructor?.id, courseId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("courses")
+        .select("*")
+        .eq("instructor_id", instructor?.id)
+        .neq("course_id", courseId)
+        .eq("status", "published")
+        .limit(3);
+
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!instructor?.id && !!courseId,
+  });
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>About the Instructor</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="animate-pulse space-y-4">
+            <div className="flex items-center gap-4">
+              <div className="h-16 w-16 rounded-full bg-gray-200" />
+              <div className="space-y-2">
+                <div className="h-4 w-32 bg-gray-200 rounded" />
+                <div className="h-3 w-24 bg-gray-200 rounded" />
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   // Return early if no instructor data
-  if (!instructor) {
+  if (!instructorProfile) {
     return (
       <Card>
         <CardHeader>
@@ -31,23 +86,6 @@ export const CourseInstructor = ({ instructor, courseId }: CourseInstructorProps
     );
   }
 
-  const { data: otherCourses = [], isError } = useQuery({
-    queryKey: ["instructor-courses", instructor.id, courseId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("courses")
-        .select("*")
-        .eq("instructor_id", instructor.id)
-        .neq("course_id", courseId)
-        .eq("status", "published")
-        .limit(3);
-
-      if (error) throw error;
-      return data || [];
-    },
-    enabled: !!instructor?.id && !!courseId,
-  });
-
   return (
     <Card>
       <CardHeader>
@@ -56,23 +94,23 @@ export const CourseInstructor = ({ instructor, courseId }: CourseInstructorProps
       <CardContent className="space-y-6">
         <div className="flex items-center gap-4">
           <Avatar className="h-16 w-16">
-            <AvatarImage src={instructor.profile_picture_url} />
+            <AvatarImage src={instructorProfile.profile_picture_url} />
             <AvatarFallback>
-              {instructor.first_name?.[0]}
-              {instructor.last_name?.[0]}
+              {instructorProfile.first_name?.[0]}
+              {instructorProfile.last_name?.[0]}
             </AvatarFallback>
           </Avatar>
           <div>
             <h3 className="font-semibold">
-              {instructor.first_name} {instructor.last_name}
+              {instructorProfile.first_name} {instructorProfile.last_name}
             </h3>
-            <p className="text-sm text-muted-foreground">{instructor.email}</p>
+            <p className="text-sm text-muted-foreground">{instructorProfile.email}</p>
           </div>
         </div>
 
         {otherCourses.length > 0 && !isError && (
           <div className="space-y-4">
-            <h4 className="font-semibold">Other Courses by {instructor.first_name}</h4>
+            <h4 className="font-semibold">Other Courses by {instructorProfile.first_name}</h4>
             <div className="space-y-4">
               {otherCourses.map((course: any) => (
                 <CourseCard
