@@ -41,7 +41,7 @@ const CourseDetails = () => {
         .from("profiles")
         .select("*")
         .eq("id", courseData.instructor_id)
-        .maybeSingle();
+        .single();
 
       if (instructorError) {
         console.error("Error fetching instructor:", instructorError);
@@ -118,7 +118,10 @@ const CourseDetails = () => {
           </div>
           
           <div className="space-y-8">
-            <CourseInstructor instructor={course.instructor} courseId={course.course_id} />
+            <CourseInstructor 
+              instructor={course.instructor} 
+              courseId={course.course_id} 
+            />
             <RelatedCourses 
               currentCourseId={course.course_id} 
               categoryIds={course.category_ids} 
