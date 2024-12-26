@@ -17,30 +17,30 @@ const CourseDetails = () => {
   const { data: course, isLoading, error } = useQuery({
     queryKey: ["course", courseId],
     queryFn: async () => {
-      // First, get the course data
+      console.log("Fetching course with ID:", courseId);
+      
+      // Get the course data along with the instructor profile in a single query
       const { data: courseData, error: courseError } = await supabase
         .from("courses")
-        .select("*")
+        .select(`
+          *,
+          instructor:profiles(*)
+        `)
         .eq("course_id", courseId)
         .maybeSingle();
 
-      if (courseError) throw courseError;
-      if (!courseData) return null;
+      if (courseError) {
+        console.error("Error fetching course:", courseError);
+        throw courseError;
+      }
+      
+      if (!courseData) {
+        console.log("No course found with ID:", courseId);
+        return null;
+      }
 
-      // Then, get the instructor profile data
-      const { data: instructorData, error: instructorError } = await supabase
-        .from("profiles")
-        .select("id, first_name, last_name, profile_picture_url, email")
-        .eq("id", courseData.instructor_id)
-        .maybeSingle();
-
-      if (instructorError) throw instructorError;
-
-      // Combine the data
-      return {
-        ...courseData,
-        instructor: instructorData
-      };
+      console.log("Course data with instructor:", courseData);
+      return courseData;
     },
     enabled: !!courseId,
   });
