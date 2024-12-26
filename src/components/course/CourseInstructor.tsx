@@ -12,8 +12,10 @@ interface CourseInstructorProps {
 }
 
 export const CourseInstructor = ({ instructor, courseId }: CourseInstructorProps) => {
+  console.log("CourseInstructor props:", { instructor, courseId });
+
   // Fetch instructor profile data
-  const { data: instructorProfile, isLoading } = useQuery({
+  const { data: instructorProfile, isLoading, error: profileError } = useQuery({
     queryKey: ["instructor-profile", instructor?.id],
     queryFn: async () => {
       console.log("Fetching instructor profile for ID:", instructor?.id);
@@ -36,6 +38,7 @@ export const CourseInstructor = ({ instructor, courseId }: CourseInstructorProps
   const { data: otherCourses = [], isError } = useQuery({
     queryKey: ["instructor-courses", instructor?.id, courseId],
     queryFn: async () => {
+      console.log("Fetching other courses for instructor:", instructor?.id);
       const { data, error } = await supabase
         .from("courses")
         .select("*")
@@ -45,6 +48,7 @@ export const CourseInstructor = ({ instructor, courseId }: CourseInstructorProps
         .limit(3);
 
       if (error) throw error;
+      console.log("Other courses data:", data);
       return data || [];
     },
     enabled: !!instructor?.id && !!courseId,
@@ -67,6 +71,25 @@ export const CourseInstructor = ({ instructor, courseId }: CourseInstructorProps
               </div>
             </div>
           </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Show error state if profile fetch failed
+  if (profileError) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>About the Instructor</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              Error loading instructor information: {profileError.message}
+            </AlertDescription>
+          </Alert>
         </CardContent>
       </Card>
     );
