@@ -36,25 +36,34 @@ const CourseDetails = () => {
         return null;
       }
 
+      console.log("Course data fetched:", courseData);
+      console.log("Fetching instructor with ID:", courseData.instructor_id);
+
       // Then get the instructor profile data
       const { data: instructorData, error: instructorError } = await supabase
         .from("profiles")
         .select("*")
         .eq("id", courseData.instructor_id)
-        .single();
+        .maybeSingle();
 
       if (instructorError) {
         console.error("Error fetching instructor:", instructorError);
-        throw instructorError;
+        // Don't throw the error, just log it
+        return {
+          ...courseData,
+          instructor: null
+        };
       }
 
-      // Combine the data
+      console.log("Instructor data fetched:", instructorData);
+
+      // Combine the data, handling the case where instructor might be null
       const fullCourseData = {
         ...courseData,
-        instructor: instructorData
+        instructor: instructorData || null
       };
 
-      console.log("Course data with instructor:", fullCourseData);
+      console.log("Full course data:", fullCourseData);
       return fullCourseData;
     },
     enabled: !!courseId,
