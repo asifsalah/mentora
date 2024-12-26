@@ -19,13 +19,10 @@ const CourseDetails = () => {
     queryFn: async () => {
       console.log("Fetching course with ID:", courseId);
       
-      // Get the course data along with the instructor profile in a single query
+      // First get the course data
       const { data: courseData, error: courseError } = await supabase
         .from("courses")
-        .select(`
-          *,
-          instructor:profiles(*)
-        `)
+        .select("*")
         .eq("course_id", courseId)
         .maybeSingle();
 
@@ -39,8 +36,26 @@ const CourseDetails = () => {
         return null;
       }
 
-      console.log("Course data with instructor:", courseData);
-      return courseData;
+      // Then get the instructor profile data
+      const { data: instructorData, error: instructorError } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", courseData.instructor_id)
+        .maybeSingle();
+
+      if (instructorError) {
+        console.error("Error fetching instructor:", instructorError);
+        throw instructorError;
+      }
+
+      // Combine the data
+      const fullCourseData = {
+        ...courseData,
+        instructor: instructorData
+      };
+
+      console.log("Course data with instructor:", fullCourseData);
+      return fullCourseData;
     },
     enabled: !!courseId,
   });
