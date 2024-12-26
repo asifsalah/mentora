@@ -16,13 +16,18 @@ export const CourseInstructor = ({ instructor, courseId }: CourseInstructorProps
   const { data: instructorProfile, isLoading } = useQuery({
     queryKey: ["instructor-profile", instructor?.id],
     queryFn: async () => {
+      console.log("Fetching instructor profile for ID:", instructor?.id);
       const { data, error } = await supabase
         .from("profiles")
         .select("*")
         .eq("id", instructor?.id)
         .maybeSingle();
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching instructor profile:", error);
+        throw error;
+      }
+      console.log("Instructor profile data:", data);
       return data;
     },
     enabled: !!instructor?.id,
