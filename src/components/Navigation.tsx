@@ -2,11 +2,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, LogOut } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Navigation = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const { data: session } = useQuery({
     queryKey: ["session"],
@@ -17,8 +18,13 @@ export const Navigation = () => {
   });
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
-    navigate("/");
+    try {
+      await supabase.auth.signOut();
+      queryClient.removeQueries({ queryKey: ["session"] });
+      navigate("/auth");
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
   };
 
   return (
