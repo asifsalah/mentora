@@ -50,6 +50,29 @@ export const CourseCard = ({
     enabled: !!category,
   });
 
+  const { data: isEnrolled = false } = useQuery({
+    queryKey: ["enrollment", courseId],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return false;
+
+      const { data, error } = await supabase
+        .from("course_enrollments")
+        .select("enrollment_id")
+        .eq("course_id", courseId)
+        .eq("student_id", user.id)
+        .eq("status", "active")
+        .maybeSingle();
+
+      if (error) {
+        console.error("Error checking enrollment:", error);
+        return false;
+      }
+
+      return !!data;
+    },
+  });
+
   return (
     <Card className="flex flex-col h-full overflow-hidden transition-all duration-300 hover:shadow-lg">
       <div className="relative aspect-video">
@@ -87,12 +110,21 @@ export const CourseCard = ({
             <Button variant="outline" asChild>
               <Link to={`/course/${courseId}`}>View Details</Link>
             </Button>
-            <Button 
-              onClick={onEnroll} 
-              className="bg-[#1a1d24] hover:bg-[#2a2d34]"
-            >
-              Enroll Now
-            </Button>
+            {isEnrolled ? (
+              <Button 
+                asChild
+                className="bg-[#1a1d24] hover:bg-[#2a2d34]"
+              >
+                <Link to={`/course/${courseId}/lessons`}>Continue</Link>
+              </Button>
+            ) : (
+              <Button 
+                onClick={onEnroll} 
+                className="bg-[#1a1d24] hover:bg-[#2a2d34]"
+              >
+                Enroll Now
+              </Button>
+            )}
           </div>
         </div>
       </CardFooter>

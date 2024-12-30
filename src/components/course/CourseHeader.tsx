@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Share2, Play } from "lucide-react";
 import { useState } from "react";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { Link } from "react-router-dom";
 
 interface CourseHeaderProps {
   course: any;
@@ -28,6 +29,29 @@ export const CourseHeader = ({ course }: CourseHeaderProps) => {
       return data;
     },
     enabled: !!course.category_ids?.length,
+  });
+
+  const { data: isEnrolled = false } = useQuery({
+    queryKey: ["enrollment", course.course_id],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return false;
+
+      const { data, error } = await supabase
+        .from("course_enrollments")
+        .select("enrollment_id")
+        .eq("course_id", course.course_id)
+        .eq("student_id", user.id)
+        .eq("status", "active")
+        .maybeSingle();
+
+      if (error) {
+        console.error("Error checking enrollment:", error);
+        return false;
+      }
+
+      return !!data;
+    },
   });
 
   return (
@@ -60,7 +84,13 @@ export const CourseHeader = ({ course }: CourseHeaderProps) => {
               ${course.sale_price || course.regular_price}
             </span>
           </div>
-          <Button size="lg">Enroll Now</Button>
+          {isEnrolled ? (
+            <Button size="lg" asChild>
+              <Link to={`/course/${course.course_id}/lessons`}>Continue</Link>
+            </Button>
+          ) : (
+            <Button size="lg">Enroll Now</Button>
+          )}
         </div>
       </div>
 
