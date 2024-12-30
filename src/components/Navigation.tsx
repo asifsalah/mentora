@@ -1,9 +1,26 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Search, LogOut } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Navigation = () => {
+  const navigate = useNavigate();
+
+  const { data: session } = useQuery({
+    queryKey: ["session"],
+    queryFn: async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      return session;
+    },
+  });
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate("/");
+  };
+
   return (
     <nav className="border-b">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -20,8 +37,26 @@ export const Navigation = () => {
           </div>
 
           <div className="flex items-center gap-4">
-            <Button variant="outline">Sign In</Button>
-            <Button>Get Started</Button>
+            {session ? (
+              <>
+                <span className="text-sm text-muted-foreground">
+                  {session.user.email}
+                </span>
+                <Button variant="outline" onClick={handleLogout}>
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Sign Out
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button variant="outline" asChild>
+                  <Link to="/auth">Sign In</Link>
+                </Button>
+                <Button asChild>
+                  <Link to="/auth">Get Started</Link>
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </div>
