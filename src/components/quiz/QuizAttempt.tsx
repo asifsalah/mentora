@@ -41,26 +41,44 @@ export const QuizAttempt = ({ quiz }: QuizAttemptProps) => {
     },
   });
 
+  const { data: user } = useQuery({
+    queryKey: ["current-user"],
+    queryFn: async () => {
+      const { data: { user }, error } = await supabase.auth.getUser();
+      if (error) throw error;
+      return user;
+    },
+  });
+
   const { data: canAttempt } = useQuery({
     queryKey: ["can-attempt-quiz", quiz.quiz_id],
     queryFn: async () => {
+      if (!user) return false;
+      
       const { data, error } = await supabase.rpc(
         "can_attempt_quiz",
-        { quiz_id: quiz.quiz_id }
+        { 
+          quiz_id: quiz.quiz_id,
+          user_id: user.id
+        }
       );
 
       if (error) throw error;
       return data;
     },
+    enabled: !!user,
   });
 
   const submitAttempt = useMutation({
     mutationFn: async () => {
+      if (!user) throw new Error("User not authenticated");
+
       // Create attempt
       const { data: attempt, error: attemptError } = await supabase
         .from("quiz_attempts")
         .insert({
           quiz_id: quiz.quiz_id,
+          user_id: user.id,
           attempt_number: 1, // TODO: Get actual attempt number
         })
         .select()

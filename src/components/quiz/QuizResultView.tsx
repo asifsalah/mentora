@@ -24,7 +24,7 @@ export const QuizResultView = ({ attempt }: QuizResultViewProps) => {
             <div>
               <div className="text-sm text-muted-foreground">Status</div>
               <div>
-                <Badge variant={passed ? "success" : "destructive"}>
+                <Badge variant={passed ? "secondary" : "destructive"}>
                   {passed ? "Passed" : "Failed"}
                 </Badge>
               </div>
